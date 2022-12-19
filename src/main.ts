@@ -38,6 +38,7 @@ export interface Options {
   cancel?: string;
   cancelClasses?: Array<string>;
   formClasses?: Array<string>;
+  btnWrapperClasses?: Array<string>;
   inputClasses?: Array<string>,
   debug?: boolean;
   event?: EventType;
@@ -83,6 +84,7 @@ export class Malle {
       cancel: '',
       cancelClasses: [],
       formClasses: [],
+      btnWrapperClasses: [],
       inputClasses: [],
       debug: false,
       event: EventType.Click,
@@ -300,6 +302,15 @@ export class Malle {
     const input = this.getInput();
     form.appendChild(input);
 
+    const btnWrapper = document.createElement('div');
+    this.opt.btnWrapperClasses.forEach(cl => {
+      btnWrapper.classList.add(cl);
+    });
+
+    if (this.opt[Action.Submit] || this.opt[Action.Cancel]) {
+      form.appendChild(btnWrapper);
+    }
+
     // now the submit/cancel buttons
     [Action.Submit, Action.Cancel].forEach(action => {
       if (this.opt[action]) {
@@ -312,7 +323,7 @@ export class Malle {
         });
         // execute action on click
         btn.addEventListener('click', this[action].bind(this));
-        form.appendChild(btn);
+        btnWrapper.appendChild(btn);
       }
     });
 

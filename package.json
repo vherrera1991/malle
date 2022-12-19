@@ -1,10 +1,10 @@
 {
-  "name": "@deltablot/malle",
-  "version": "1.0.1",
+  "name": "@islacel/malle",
+  "version": "1.0.2",
   "description": "Make text elements malleable",
   "main": "dist/main.js",
   "typings":  "dist/main.d.ts",
-  "repository": "https://github.com/deltablot/malle",
+  "repository": "https://github.com/vmherrera1991/malle",
   "author": "Nicolas CARPi @ Deltablot>",
   "license": "MIT",
   "private": false,
