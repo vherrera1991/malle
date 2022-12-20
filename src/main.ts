@@ -118,7 +118,7 @@ export class Malle {
       .forEach((el: HTMLElement) => {
         el.addEventListener(this.opt.event, this.process.bind(this));
         // make the mouse change to pointer on targeted elements
-        el.style.cursor = 'pointer';
+        // el.style.cursor = 'pointer';
         if (this.opt.tooltip) {
           el.title = this.opt.tooltip;
         }
