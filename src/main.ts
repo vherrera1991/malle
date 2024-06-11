@@ -5,59 +5,186 @@
  * https://github.com/deltablot/malle
  */
 
+// The `InputType` will set the `type` attribute of the generated input element.
 export enum InputType {
+  Color = 'color',
+  Date = 'date',
   Datetime = 'datetime-local',
   Email = 'email',
   Number = 'number',
   Select = 'select',
   Text = 'text',
   Textarea = 'textarea',
+  Time = 'time',
   Url = 'url',
 }
 
+// List of possible trigger events
 export enum EventType {
+  // A mouse click triggers the event (default)
   Click = 'click',
+  // Trigger malle when the mouse starts hovering the element
   Mouseenter = 'mouseenter',
+  // Trigger malle when the mouse stops hovering the element
   Mouseover = 'mouseover',
 }
 
+// List of possible action that can be defined at different moments
 export enum Action {
+  // Submit the form
   Submit = 'submit',
+  // Cancel change and revert to initial element
   Cancel = 'cancel',
+  // Do nothing
   Ignore = 'ignore',
 }
 
+// Structure for the select element options
 export interface SelectOptions {
+  // Value of the option.
   value?: string;
+  // Displayed text of the option.
   text?: string;
+  // Is this option selected?
   selected?: boolean;
 }
 
+// Configuration object for the Malle class.
 export interface Options {
+  // Function to execute after all the other events.
+  after?(original: HTMLElement, event:Event, value: string): boolean;
+  /**
+   * This function will be called before anything else is done, once the trigger event has been fired.
+   * If it returns something else than `true`, the edition will be canceled.
+   */
   before?(original: HTMLElement, event:Event): boolean;
+  // The text displayed on Cancel button.
+  // @example Abort
   cancel?: string;
+  // The classes added to Cancel button.
+  // @example ['btn', 'btn-secondary']
   cancelClasses?: Array<string>;
+  // Enabling debug mode will produce verbose output in the console.
+  // @default false
+  debug?: boolean;
+  // This is where you define the type of event that will trigger malle.
+  // @default EventType.Click
+  event?: EventType;
+  // Should the newly created input grab focus?
+  // @default true
+  focus?: boolean;
+  // The classes added to the form element.
+  // @example ['d-inline-flex']
   formClasses?: Array<string>;
   btnWrapperClasses?: Array<string>;
+  /**
+   * This is the main and only mandatory option parameter. It is the user function that is called when the Submit action happens.
+   * @example with a custom function
+   * ```
+   * // this is the user function that will process the new value
+   * // typically this will POST to some endpoint and get some json back
+   * // it receives the event
+   * const myCustomFunction = (value, orig) => {
+   *   console.log(`New text: ${value}`);
+   *   // do something with that value, like POSTing it somewhere
+   *   return new Promise(resolve => resolve(value));
+   * };
+   *
+   * new Malle({
+   *   fun: myCustomFunction,
+   * }).listen();
+   * ```
+   */
+  fun(value: string, original: HTMLElement, event:Event, input: HTMLInputElement|HTMLSelectElement): Promise<string>;
+  // The classes added to the input element.
+  // @example ['form-control']
   inputClasses?: Array<string>,
-  debug?: boolean;
-  event?: EventType;
+  // Define the type of the input element.
+  // @default InputType.Text
   inputType?: InputType;
-  focus?: boolean;
-  fun(value: string, original: HTMLElement, event:Event, input: HTMLInputElement): string;
+  // Start listening immediatly or not.
+  // @default false
   listenNow?: boolean;
+  // HTML selector to target malleable elements on the page.
   listenOn?: string;
+  // What Action should be taken when focus of the input is lost.
   onBlur?: Action;
-  onEdit?(original: HTMLElement, event:Event, input: HTMLInputElement): boolean;
+  /**
+   * A function that runs when a Cancel action is performed. Must return `true` or the input is not reverted to the original element.
+   * @example
+   * ```javascript
+   * onCancel: (original, event, input) => {
+   *   console.log('a cancel action has been detected');
+   *   return true;
+   * },
+   * ```
+   */
+  onCancel?(original: HTMLElement, event:Event, input: HTMLInputElement|HTMLSelectElement): boolean | Promise<boolean>;
+  /**
+   * This function runs right after the form is created. Its return value has no impact.
+   * @example
+   * ```javascript
+   * onEdit: (original, event, input) => {
+   *   console.log('this will run after the input is present on the page');
+   *   return true;
+   * },
+   * ```
+   */
+  onEdit?(original: HTMLElement, event:Event, input: HTMLInputElement|HTMLSelectElement): boolean | Promise<boolean>;
+  // What Action should be taken when the Enter key is pressed?
+  // @default Action.Submit
   onEnter?: Action;
+  // What Action should be taken when the Escape key is pressed?
+  // @default Action.Cancel
+  onEscape?: Action;
+  // A text that is shown on empty input.
   placeholder?: string;
+  // Do nothing if new value is the same as the old value.
+  // @default true
   requireDiff?: boolean;
+  // Use innerHTML instead of innerText (only use if the return value is trusted HTML).
+  // @default false
+  returnedValueIsTrustedHtml?: boolean;
+  /*
+   * An array of options for InputType.Select. Can also be a Promise and fetched asynchronously.
+   * @example Directly give the options to use
+   * ```javascript
+   * selectOptions: [
+   *   { value: '1', text: 'Rivoli' },
+   *   { value: '2', text: 'Austerlitz' },
+   *   { value: '3', text: 'Marengo', selected: true },
+   * ],
+   * ```
+   * @example Fetch the options with an HTTP request or any other function
+   * ```javascript
+   * // Change the keys used to lookup value and text
+   * selectOptionsValueKey: 'id',
+   * selectOptionsTextKey: 'title',
+   * // this promises to return an Array with objects that have the keys "id" and "title"
+   * selectOptions: Something.getOptions(),
+   * ```
+   */
   selectOptions?: Array<SelectOptions> | Promise<Array<SelectOptions>>;
+  // What is the name of the key to use to lookup the values in the selectOptions array?
+  // @default value
   selectOptionsValueKey?: string;
+  // What is the name of the key to use to lookup the option text in the selectOptions array?
+  // @default text
   selectOptionsTextKey?: string;
+  // The text on the Submit button.
+  // @example Save changes
   submit?: string;
+  /**
+   * The classes added to the submit button.
+   * @example With bootstrap classes
+   * ```
+   * submitClasses: ['btn', 'btn-primary', 'mt-2'],
+   * ```
+   */
   submitClasses?: Array<string>;
+  // The text added on hover of the malleable element. Uses the `title` attribute.
   tooltip?: string;
+  // Allow setting a different value than the current element content.
   inputValue?: string;
 }
 
@@ -66,6 +193,7 @@ export class Malle {
   opt: Options;
   original: HTMLElement;
   input: HTMLInputElement|HTMLSelectElement;
+  innerFun: string;
 
   constructor(options: Options) {
     this.opt = this.normalizeOptions(options);
@@ -73,13 +201,15 @@ export class Malle {
     if (this.opt.listenNow) {
       this.listen();
     }
+    // by default we use innerText to insert the return value, but if we know it's trusted html we get back, we allow using innerHTML instead
+    // once setHTML() becomes more widespread, we'll use that instead
+    this.innerFun = this.opt.returnedValueIsTrustedHtml ? 'innerHTML' : 'innerText';
   }
 
-  /**
-   * Assign defaults to options
-   */
+  // Assign defaults to options
   normalizeOptions(options: Options): Options {
     const defaultOptions = {
+      after: undefined,
       before: undefined,
       cancel: '',
       cancelClasses: [],
@@ -91,14 +221,16 @@ export class Malle {
       focus: true,
       fun: () => new Error('No user function defined!'),
       inputType: InputType.Text,
-      // don't listen for events on instanciation unless requested
       listenNow: false,
       listenOn: '[data-malleable="true"]',
       onBlur: Action.Submit,
+      onCancel: undefined,
       onEdit: undefined,
       onEnter: Action.Submit,
+      onEscape: Action.Cancel,
       placeholder: '',
       requireDiff: true,
+      returnedValueIsTrustedHtml: false,
       selectOptions: [],
       selectOptionsValueKey: 'value',
       selectOptionsTextKey: 'text',
@@ -116,7 +248,10 @@ export class Malle {
   listen() {
     document.querySelectorAll(this.opt.listenOn)
       .forEach((el: HTMLElement) => {
-        el.addEventListener(this.opt.event, this.process.bind(this));
+        const opt = this.opt;
+        opt.listenNow = false;
+        const m = new Malle(opt);
+        el.addEventListener(this.opt.event, m.process.bind(m));
         // make the mouse change to pointer on targeted elements
         // el.style.cursor = 'pointer';
         if (this.opt.tooltip) {
@@ -160,15 +295,28 @@ export class Malle {
         return false;
       }
     }
-    const value = this.opt.fun.call(this, this.input.value, this.original, event, this.input);
-    this.original.innerText = this.opt.inputType === InputType.Select ? (this.input as HTMLSelectElement).options[(this.input as HTMLSelectElement).selectedIndex].text : value;
-    this.form.replaceWith(this.original);
+    this.opt.fun.call(this, this.input.value, this.original, event, this.input).then((value: string) => {
+      this.original[this.innerFun] = this.opt.inputType === InputType.Select ? (this.input as HTMLSelectElement).options[(this.input as HTMLSelectElement).selectedIndex].text : value;
+      this.form.replaceWith(this.original);
+      // execute the after hook
+      if (typeof this.opt.after === 'function') {
+        return this.opt.after(this.original, event, value);
+      }
+    });
+
     return true;
   }
 
   cancel(event: Event): boolean {
     event.preventDefault();
     this.debug(event.toString());
+    // execute the before hook
+    if (typeof this.opt.onCancel === 'function') {
+      this.debug('running onCancel function');
+      if (this.opt.onCancel(this.original, event, this.input) !== true) {
+        return;
+      }
+    }
     this.debug('reverting to original element');
     this.form.replaceWith(this.original);
     return true;
@@ -188,22 +336,38 @@ export class Malle {
   }
 
   handleKeypress(event: KeyboardEvent): boolean {
-    // we only care about the Enter key
-    // and ignore it for textarea
-    if (event.key !== 'Enter' || this.opt.inputType === InputType.Textarea) {
+    // ignore it for textarea
+    if (this.opt.inputType === InputType.Textarea) {
       return false;
     }
-    // read behavior from options
-    let enterAction: string = this.opt.onEnter;
-    // and let element override it
-    if (this.original.dataset.maEnter) {
-      enterAction = this.original.dataset.maEnter;
-    }
-    if (enterAction === Action.Ignore) {
-      event.preventDefault();
+    if (event.key === 'Enter') {
+      // read behavior from options
+      let enterAction: string = this.opt.onEnter;
+      // and let element override it
+      if (this.original.dataset.maEnter) {
+        enterAction = this.original.dataset.maEnter;
+      }
+      if (enterAction === Action.Ignore) {
+        event.preventDefault();
+        return;
+      }
+      this[enterAction](event);
       return;
     }
-    this[enterAction](event);
+
+    if (event.key === 'Escape') {
+      // read behavior from options
+      let escAction: string = this.opt.onEscape;
+      // and let element override it
+      if (this.original.dataset.maEscape) {
+        escAction = this.original.dataset.maEscape;
+      }
+      if (escAction === Action.Ignore) {
+        event.preventDefault();
+        return;
+      }
+      this[escAction](event);
+    }
   }
 
   getInput(): HTMLInputElement {
@@ -259,14 +423,15 @@ export class Malle {
         o.forEach(o => {
           const option = document.createElement('option');
           option.value = o[this.opt.selectOptionsValueKey];
-          option.innerText = o[this.opt.selectOptionsTextKey];
-          option.selected = (o.selected ?? false) || this.original.innerText === o[this.opt.selectOptionsTextKey];
+          option[this.innerFun] = o[this.opt.selectOptionsTextKey];
+          option.selected = (o.selected ?? false) || this.original[this.innerFun] === o[this.opt.selectOptionsTextKey];
           input.appendChild(option);
         });
       });
     }
-    // listen on keypress for Enter key
-    input.addEventListener('keypress', this.handleKeypress.bind(this));
+    // listen on keypress for Enter/Escape keys. Note that Escape will only appear with keydown/keyup, not keypress event.
+    // and we need to use keydown instead of keyup otherwise the default behavior is processed.
+    input.addEventListener('keydown', this.handleKeypress.bind(this));
     // listen also on blur events
     // but only if there is no action buttons
     if (this.opt.submit === '' && this.opt.cancel === '') {

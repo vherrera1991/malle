@@ -1,5 +1,42 @@
 # Changelog for malle
 
+## 2.6.0
+
+* Add `onCancel` option to give a function to run when a Cancel action is triggered. fix #13
+
+## 2.5.2
+
+* Allow returning a `Promise<boolean>` with `onEdit`
+
+## 2.5.1
+
+* Fix the type of `input` from `fun` or `onEdit` to `HTMLInputElement|HTMLSelectElement`
+
+## 2.5.0
+
+* Create a new instance of Malle for each element (PR #8). This allows opening multiple inputs at the same time. fix #4
+
+## 2.4.2
+
+* Add `onEscape` option to set behavior of Escape keypress (fix #6)
+* Previous releases 2.4.0 and 2.4.1 were incorrect in terms of tags/versions
+
+## 2.3.0
+
+* Add `returnedValueIsTrustedHtml` so the function used on original element is `innerHTML` instead of the safer `innerText`.
+
+## 2.2.0
+
+* Add `color`, `date`, `time` input types.
+
+## 2.1.0
+
+* Add `after` hook, triggered after replacement of element.
+
+## 2.0.0
+
+* The `fun` function now expects a `Promise<string>` as return value
+
 ## 1.0.1
 
 * Switch eslint-plugin-node (unmaintained) to eslint-plugin-n

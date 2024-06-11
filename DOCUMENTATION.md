@@ -1,5 +1,7 @@
 # Documentation for malle
 
+# DEPRECATED, replaced by typedoc
+
 Note: you can use this library in a typescript or javascript project. When in typescript, import the interfaces to have strong typing everywhere.
 
 ~~~javascript
@@ -17,6 +19,12 @@ By default it will listen for click events on `[data-malleable='true']` elements
 When instanciating the `Malle` class, you need to give it an `Options` argument. The only required value is `fun` which is your custom function.
 
 Available options:
+
+#### after
+`Function(original: HTMLElement, event: Event, value: string): boolean`
+default: `undefined`
+
+This function will be called after everything is processed.
 
 #### before
 `Function(original: HTMLElement, event: Event): boolean`
@@ -84,10 +92,10 @@ default: `true`
 Bring the input into focus.
 
 #### fun (required)
-`Function(value: string, original: HTMLElement, event: Event, input: HTMLInputElement): string`
+`Function(value: string, original: HTMLElement, event: Event, input: HTMLInputElement): Promise<string>`
 default: `undefined`
 
-This is your function doing the hard work. It must return the `value` as a string, and this will be the new value of the target element. Use the original element, the event or the input to achieve what you want. Typically, this function will make a POST or PUT request to update the value in the backend.
+This is your function doing the hard work. It must return the `value` as a `Promise<string>`, and this string will be the new value of the target element. Use the original element, the event or the input to achieve what you want. Typically, this function will make a POST or PUT request to update the value in the backend.
 
 #### listenNow
 boolean
@@ -112,7 +120,7 @@ default value: 'submit'
 What to do when the user clicks outside the input? By default the form will be submitted (if valid), but you can decide to do nothing or cancel the edition.
 
 #### onEdit
-`Function(original: HTMLElement, event: Event, input: HTMLInputElement): any`
+`Function(original: HTMLElement, event: Event, input: HTMLInputElement): boolean | Promise<boolean>`
 default: `undefined`
 
 This function will be called once the input is there and user is ready to type. The return value is not checked.
@@ -127,12 +135,29 @@ default value: 'submit'
 
 What to do when the user presses Enter key? By default the form will be submitted (if valid), but you can decide to do nothing or cancel the edition.
 
+#### onEscape
+`Action`
+* `Action.Submit` (`'submit'`)
+* `Action.Cancel` (`'cancel'`)
+* `Action.Ignore` (`'ignore'`)
+
+default value: 'cancel'
+
+What to do when the user presses Escape key? By default the form will be cancelled, but you can decide to do nothing or even submit the form if you're crazy.
+
 #### requireDiff
 boolean
 
 default: `true`
 
 By default, the `fun` function won't be called in the input value is the same as the original value. Set to `false` to always call `fun` regardless of input.
+
+#### returnedValueIsTrustedHtml
+boolean
+
+default: `false`
+
+If `true`, `innerHTML` is used instead of `innerText` with the returned value from the server. Helps with html-encoded strings ending up wrongly displayed after an edit/save. Only set to `true` if you sanitize output and have a strict CSP.
 
 #### selectOptions
 `Array<SelectOptions>`
@@ -166,5 +191,3 @@ string
 default: `''`
 
 Set the title of the elements we listen on. You could use something like `Click to edit!`. The text will be visible if the mouse is hovering the element.
-
-

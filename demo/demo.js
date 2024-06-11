@@ -4,15 +4,7 @@
  * License MIT
  * https://github.com/deltablot/malle
  */
-
-// figure out if we are in dev mode or demo/prod mode by loading this file
-import config from './config.js';
-
-// in dev mode the lib is in the parent folder, but in the docker image it is in the current dir
-let libPath = './dist/main.js';
-if (config.env === 'dev') {
-  libPath = '.' + libPath;
-}
+const libPath = '../dist/main.js';
 
 // use a dynamic named import here
 const { Action, InputType, Malle } = await import(libPath);
@@ -24,7 +16,7 @@ const { Action, InputType, Malle } = await import(libPath);
 const myCustomFunction = (value, orig) => {
   console.log(`New text: ${value}`);
   // do something with that value, like POSTing it somewhere
-  return value;
+  return new Promise(resolve => resolve(value));
 };
 
 // minimal options
@@ -66,7 +58,7 @@ const malle = new Malle({
 // this has no listenOn option so it will listen on all data-malleable='true' elements
 new Malle({
   fun: value => {
-    return value;
+    return new Promise(resolve => resolve(value));
   },
   formClasses: ['d-inline-flex'],
   onBlur: Action.Ignore,
@@ -74,9 +66,27 @@ new Malle({
 // instead of using listenNow, we call listen() right after instanciation
 }).listen();
 
+// onCancel
 new Malle({
   fun: value => {
-    return value;
+    return new Promise(resolve => resolve(value));
+  },
+  formClasses: ['d-inline-flex'],
+  debug: true,
+  onCancel: () => {
+    console.log('a cancel action has been detected');
+    return true;
+  },
+  onBlur: Action.Cancel,
+  cancel: 'Cancel',
+  cancelClasses: ['btn', 'btn-danger'],
+  listenOn: '.onCancel',
+  listenNow: true,
+});
+
+new Malle({
+  fun: value => {
+    return new Promise(resolve => resolve(value));
   },
   inputType: InputType.Select,
   selectOptions: [

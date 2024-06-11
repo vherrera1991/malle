@@ -23,6 +23,10 @@ The created input can be a normal input or a textarea.
 
 The user provided function will typically POST to an endpoint to get some JSON back.
 
+## Demo
+
+Live demo: https://deltablot.github.io/malle/
+
 ## Installation
 
 ~~~bash
@@ -47,20 +51,20 @@ const malle = new Malle({
     console.log(`Original element:`);
     console.log(original);
     // add here your code for POSTing the new value
-    // something along the line of:
-    return fetch('/ajax', {
-      method: 'POST',
-      body: JSON.stringify({ 'name': value, 'id': original.dataset.id }),
-    });
+    return myFunctionReturingAPromiseString();
   },
 }).listen(); // directly start listening after object creation
 ~~~
 
 In this example, when a user clicks on an element with `data-malleable='true'`, the function in the `fun` option will be called. The element will be replaced by a `form` containing the `input` and optionally action buttons (Submit, Cancel).
 
-See the [Documentation](./DOCUMENTATION.md) for usage and available options.
+Head to the [Demo](https://deltablot.github.io/malle/) to see more examples.
 
-See the [demo/](./demo) folder for a full example.
+See the [API Documentation](https://deltablot.github.io/malle/api) for usage and available options.
+
+## Maintenance status
+
+`malle` is currently **MAINTAINED** and used in production environments.
 
 ## Contributing
 
